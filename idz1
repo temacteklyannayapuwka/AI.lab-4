@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Представление комнат как графа
+class RoomGraph:
+    def __init__(self):
+        self.graph = {}
+
+    def add_room(self, room):
+        if room not in self.graph:
+            self.graph[room] = []
+
+    def add_connection(self, room1, room2):
+        if room1 not in self.graph:
+            self.add_room(room1)
+        if room2 not in self.graph:
+            self.add_room(room2)
+        self.graph[room1].append(room2)
+        self.graph[room2].append(room1)
+
+    def get_neighbors(self, room):
+        return self.graph.get(room, [])
+
+# Поиск в глубину с ограничением глубины
+def dfs(graph, start, target, max_depth, visited, depth=0):
+    # Если мы достигли максимальной глубины, прекращаем поиск
+    if depth > max_depth:
+        return False
+    
+    # Если нашли целевую комнату
+    if start == target:
+        return True
+
+    # Помечаем текущую комнату как посещенную
+    visited.add(start)
+
+    # Рекурсивный поиск по соседям
+    for neighbor in graph.get_neighbors(start):
+        if neighbor not in visited:
+            if dfs(graph, neighbor, target, max_depth, visited, depth + 1):
+                return True
+
+    # Если путь не найден
+    return False
+
+# Основная функция
+def can_reach_target(graph, start, target, max_depth):
+    visited = set()
+    return dfs(graph, start, target, max_depth, visited)
+
+# Пример использования
+graph = RoomGraph()
+
+# Добавление комнат и связей между ними
+graph.add_connection("Living Room", "Kitchen")
+graph.add_connection("Living Room", "Hallway")
+graph.add_connection("Kitchen", "Bathroom")
+graph.add_connection("Hallway", "Bedroom")
+graph.add_connection("Bedroom", "Bathroom")
+
+# Тестирование: Можно ли добраться из "Living Room" в "Bedroom" с ограничением по глубине 2?
+start_room = "Living Room"
+target_room = "Bedroom"
+max_depth = 2
+
+if can_reach_target(graph, start_room, target_room, max_depth):
+    print(f"Путь от {start_room} к {target_room} найден в пределах {max_depth} шагов.")
+else:
+    print(f"Путь от {start_room} к {target_room} не найден в пределах {max_depth} шагов.")
