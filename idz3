@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+class Node:
+    def __init__(self, profit):
+        self.profit = profit  # Прибыль, полученная в результате этого решения
+        self.children = []   # Дочерние узлы (следующие решения/исходы)
+
+    def add_child(self, node):
+        self.children.append(node)
+
+class InvestmentDecisionTree:
+    def __init__(self):
+        self.root = None  # Корень дерева решений
+
+    def set_root(self, root):
+        """ Установить корень дерева решений """
+        self.root = root
+
+    def dfs(self, node, current_depth, max_depth):
+        """ Поиск в глубину с ограничением по глубине """
+        # Если достигнута максимальная глубина, возвращаем прибыль этого узла
+        if current_depth >= max_depth:
+            return node.profit
+        
+        # Если узел не имеет дочерних узлов, возвращаем его прибыль
+        if not node.children:
+            return node.profit
+        
+        # Рекурсивно ищем максимальную прибыль среди дочерних узлов
+        max_profit = node.profit  # Начнем с текущей прибыли
+        
+        for child in node.children:
+            child_profit = self.dfs(child, current_depth + 1, max_depth)
+            max_profit = max(max_profit, child_profit)
+        
+        return max_profit
+
+    def find_best_outcome(self, max_depth):
+        """ Найти лучший исход на заданной глубине """
+        return self.dfs(self.root, 0, max_depth)
+
+# Пример использования
+
+# Создание дерева решений
+root = Node(1000)  # Начальная прибыль на уровне 0 (основное инвестиционное решение)
+level_1_a = Node(1500)
+level_1_b = Node(1200)
+
+root.add_child(level_1_a)
+root.add_child(level_1_b)
+
+level_2_a1 = Node(1800)
+level_2_a2 = Node(1300)
+level_2_b1 = Node(1400)
+level_2_b2 = Node(1600)
+
+level_1_a.add_child(level_2_a1)
+level_1_a.add_child(level_2_a2)
+level_1_b.add_child(level_2_b1)
+level_1_b.add_child(level_2_b2)
+
+# Создание объекта дерева решений
+tree = InvestmentDecisionTree()
+tree.set_root(root)
+
+# Поиск наилучшего исхода с ограничением глубины 2
+max_depth = 2
+best_outcome = tree.find_best_outcome(max_depth)
+
+print(f"Лучший исход на глубине {max_depth}: {best_outcome}")
