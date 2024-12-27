@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+class Node:
+    def __init__(self, item):
+        self.item = item  # Название товара (или его ID)
+        self.left = None  # Левый подузел (подраздел)
+        self.right = None  # Правый подузел (подраздел)
+
+class Warehouse:
+    def __init__(self):
+        self.root = None  # Корень дерева склада
+
+    def add_item(self, item, parent_item=None, direction=None):
+        """ Добавить товар в структуру склада """
+        new_node = Node(item)
+        if not self.root:
+            self.root = new_node
+            return
+        parent = self.find_item(self.root, parent_item)
+        if parent:
+            if direction == 'left':
+                parent.left = new_node
+            elif direction == 'right':
+                parent.right = new_node
+
+    def find_item(self, node, item):
+        """ Найти товар по имени (или ID) """
+        if node is None:
+            return None
+        if node.item == item:
+            return node
+        # Ищем в левом и правом поддереве
+        left = self.find_item(node.left, item)
+        if left:
+            return left
+        return self.find_item(node.right, item)
+
+    def dfs_search(self, node, target, max_depth, current_depth=0):
+        """ Поиск в глубину с ограничением по глубине """
+        if node is None:
+            return None
+        
+        # Если мы достигли целевого товара или максимальной глубины
+        if node.item == target:
+            return node.item
+        if current_depth >= max_depth:
+            return None
+
+        # Продолжаем поиск в левом и правом поддереве
+        left_search = self.dfs_search(node.left, target, max_depth, current_depth + 1)
+        if left_search:
+            return left_search
+        return self.dfs_search(node.right, target, max_depth, current_depth + 1)
+
+    def find_path_to_item(self, target, max_depth):
+        """ Найти путь к товару, ограничив глубину """
+        return self.dfs_search(self.root, target, max_depth)
+
+# Пример использования
+warehouse = Warehouse()
+
+# Добавляем товары и их расположение
+warehouse.add_item("Item A")
+warehouse.add_item("Item B", parent_item="Item A", direction="left")
+warehouse.add_item("Item C", parent_item="Item A", direction="right")
+warehouse.add_item("Item D", parent_item="Item B", direction="left")
+warehouse.add_item("Item E", parent_item="Item B", direction="right")
+
+# Поиск товара с ограничением глубины
+target_item = "Item D"
+max_depth = 3
+result = warehouse.find_path_to_item(target_item, max_depth)
+
+if result:
+    print(f"Товар {target_item} найден в пределах {max_depth} шагов.")
+else:
+    print(f"Товар {target_item} не найден в пределах {max_depth} шагов.")
